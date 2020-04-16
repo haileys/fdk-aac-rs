@@ -1,8 +1,11 @@
 [package]
 name = "fdk-aac-sys"
-version = "0.0.0"
+version = "0.1.0"
 authors = ["Charlie Somerville <charlie@charlie.bz>"]
 edition = "2018"
+description = "FFI bindings for libfdk-aac"
+homepage = "https://github.com/charliesome/fdk-aac-rs"
+repository = "https://github.com/charliesome/fdk-aac-rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
