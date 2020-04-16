@@ -3,6 +3,7 @@ name = "fdk-aac-sys"
 version = "0.1.0"
 authors = ["Hailey Somerville <hailey@hailey.lol>"]
 edition = "2018"
+license = "MIT"
 description = "FFI bindings for libfdk-aac"
 homepage = "https://github.com/haileys/fdk-aac-rs"
 repository = "https://github.com/haileys/fdk-aac-rs"
