@@ -3,6 +3,7 @@ name = "fdk-aac"
 version = "0.1.0"
 authors = ["Charlie Somerville <charlie@charlie.bz>"]
 edition = "2018"
+license = "MIT"
 description = "AAC encoding library binding to libfdk-aac"
 homepage = "https://github.com/charliesome/fdk-aac-rs"
 repository = "https://github.com/charliesome/fdk-aac-rs"
