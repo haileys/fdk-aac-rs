@@ -206,6 +206,13 @@ fn main() {
 
     cc.compile("libfdk-aac.a");
 
-    println!("cargo:rustc-link-lib=c++");
     println!("cargo:rustc-link-lib=fdk-aac");
+
+    if cfg!(target_os = "linux") {
+        println!("cargo:rustc-link-lib=stdc++");
+    }
+
+    if cfg!(target_os = "macos") {
+        println!("cargo:rustc-link-lib=c++");
+    }
 }
