@@ -1,6 +1,6 @@
 [package]
 name = "fdk-aac"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Hailey Somerville <hailey@hailey.lol>"]
 edition = "2018"
 license = "MIT"
@@ -11,4 +11,4 @@ repository = "https://github.com/haileys/fdk-aac-rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fdk-aac-sys = { version = "0.2.0", path = "fdk-aac-sys" }
+fdk-aac-sys = { version = "0.3.0", path = "fdk-aac-sys" }
