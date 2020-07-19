@@ -94,6 +94,7 @@ pub struct Encoder {
 #[derive(Debug)]
 pub enum Transport {
     Adts,
+    Raw,
 }
 
 #[derive(Debug)]
@@ -126,11 +127,10 @@ impl Encoder {
 
             check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_SAMPLERATE, params.sample_rate))?;
 
-            match params.transport {
-                Transport::Adts =>{
-                    check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_TRANSMUX, 2))?;
-                }
-            }
+            check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_TRANSMUX, match params.transport {
+                Transport::Adts => 2,
+                Transport::Raw => 0,
+            }))?;
 
             // hardcode SBR off for now
             check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_SBR_MODE, 0))?;
