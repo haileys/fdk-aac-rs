@@ -141,7 +141,6 @@ static SOURCES: &'static [&'static str] = &[
     "aac/libSBRdec/src/psdec_drm.cpp",
     "aac/libSBRdec/src/psdecrom_drm.cpp",
     "aac/libSBRdec/src/pvc_dec.cpp",
-    "aac/libSBRdec/src/sbr_crc.cpp",
     "aac/libSBRdec/src/sbr_deb.cpp",
     "aac/libSBRdec/src/sbr_dec.cpp",
     "aac/libSBRdec/src/sbr_ram.cpp",

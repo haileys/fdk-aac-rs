@@ -1,3 +1,6 @@
 [submodule "fdk-aac-sys/aac"]
 	path = fdk-aac-sys/aac
-	url = https://github.com/charliesome/fdk-aac-mirror
+	url = https://github.com/mstorsjo/fdk-aac
+[submodule "fdk-aac-sys/acc"]
+	url = https://github.com/mstorsjo/fdk-aac
+	url = https://github.com/mstorsjo/fdk-aac.branch
