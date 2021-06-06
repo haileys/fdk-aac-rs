@@ -1,4 +1,4 @@
-use std::cmp;
+use std::io::{Read, Write};
 use std::fmt::{self, Display, Debug};
 use std::mem::{self, MaybeUninit};
 use std::os::raw::{c_void, c_uint, c_int};
@@ -8,32 +8,44 @@ use fdk_aac_sys as sys;
 
 pub use sys::AACENC_InfoStruct as InfoStruct;
 
-pub struct EncoderError(sys::AACENC_ERROR);
+pub enum EncoderError {
+    Io(std::io::Error),
+    FdkAac(sys::AACENC_ERROR),
+}
 
 impl EncoderError {
     fn message(&self) -> &'static str {
-        match self.0 {
-            sys::AACENC_ERROR_AACENC_OK => "Ok",
-            sys::AACENC_ERROR_AACENC_INVALID_HANDLE => "Handle passed to function call was invalid.",
-            sys::AACENC_ERROR_AACENC_MEMORY_ERROR => "Memory allocation failed.",
-            sys::AACENC_ERROR_AACENC_UNSUPPORTED_PARAMETER => "Parameter not available.",
-            sys::AACENC_ERROR_AACENC_INVALID_CONFIG => "Configuration not provided.",
-            sys::AACENC_ERROR_AACENC_INIT_ERROR => "General initialization error.",
-            sys::AACENC_ERROR_AACENC_INIT_AAC_ERROR => "AAC library initialization error.",
-            sys::AACENC_ERROR_AACENC_INIT_SBR_ERROR => "SBR library initialization error.",
-            sys::AACENC_ERROR_AACENC_INIT_TP_ERROR => "Transport library initialization error.",
-            sys::AACENC_ERROR_AACENC_INIT_META_ERROR => "Meta data library initialization error.",
-            sys::AACENC_ERROR_AACENC_INIT_MPS_ERROR => "MPS library initialization error.",
-            sys::AACENC_ERROR_AACENC_ENCODE_ERROR => "The encoding process was interrupted by an unexpected error.",
-            sys::AACENC_ERROR_AACENC_ENCODE_EOF => "End of file reached.",
-            _ => "Unknown error",
+        match self {
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_INVALID_HANDLE) => "Handle passed to function call was invalid.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_MEMORY_ERROR) => "Memory allocation failed.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_UNSUPPORTED_PARAMETER) => "Parameter not available.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_INVALID_CONFIG) => "Configuration not provided.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_INIT_ERROR) => "General initialization error.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_INIT_AAC_ERROR) => "AAC library initialization error.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_INIT_SBR_ERROR) => "SBR library initialization error.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_INIT_TP_ERROR) => "Transport library initialization error.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_INIT_META_ERROR) => "Meta data library initialization error.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_INIT_MPS_ERROR) => "MPS library initialization error.",
+            EncoderError::FdkAac(sys::AACENC_ERROR_AACENC_ENCODE_ERROR) => "The encoding process was interrupted by an unexpected error.",
+            EncoderError::FdkAac(_) => "Unknown error",
+            EncoderError::Io(_e) => "io error",
+        }
+    }
+
+    fn code(&self) -> u32 {
+        match self {
+            EncoderError::FdkAac(code) => *code,
+            EncoderError::Io(_e) => 0,
         }
     }
 }
 
+impl std::error::Error for EncoderError {
+}
+
 impl Debug for EncoderError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "EncoderError {{ code: {:?}, message: {:?} }}", self.0 as c_int, self.message())
+        write!(f, "EncoderError {{ code: {:?}, message: {:?} }}", self.code(), self.message())
     }
 }
 
@@ -43,11 +55,17 @@ impl Display for EncoderError {
     }
 }
 
+impl From<std::io::Error> for EncoderError {
+    fn from(err: std::io::Error) -> Self {
+        EncoderError::Io(err)
+    }
+}
+
 fn check(e: sys::AACENC_ERROR) -> Result<(), EncoderError> {
     if e == sys::AACENC_ERROR_AACENC_OK {
         Ok(())
     } else {
-        Err(EncoderError(e))
+        Err(EncoderError::FdkAac(e))
     }
 }
 
@@ -151,45 +169,82 @@ impl Encoder {
         Ok(unsafe { info.assume_init() })
     }
 
-    pub fn encode(&self, input: &[i16], output: &mut [u8]) -> Result<EncodeInfo, EncoderError> {
-        let input_len = cmp::min(i32::max_value() as usize, input.len()) as i32;
+    pub fn encode<R: Read, W: Write>(&self, input: &mut R, output: &mut W) -> Result<EncodeInfo, EncoderError> {
 
-        let mut input_buf = input.as_ptr() as *mut i16;
-        let mut input_buf_ident: c_int = sys::AACENC_BufferIdentifier_IN_AUDIO_DATA as c_int;
-        let mut input_buf_size: c_int = input_len as c_int;
-        let mut input_buf_el_size: c_int = mem::size_of::<i16>() as c_int;
-        let input_desc = sys::AACENC_BufDesc {
-            numBufs: 1,
-            bufs: &mut input_buf as *mut _ as *mut *mut c_void,
-            bufferIdentifiers: &mut input_buf_ident as *mut c_int,
-            bufSizes: &mut input_buf_size as *mut c_int,
-            bufElSizes: &mut input_buf_el_size as *mut c_int,
-        };
+        let info = self.info()?;
 
-        let mut output_buf = output.as_mut_ptr();
-        let mut output_buf_ident: c_int = sys::AACENC_BufferIdentifier_OUT_BITSTREAM_DATA as c_int;
-        let mut output_buf_size: c_int = output.len() as c_int;
-        let mut output_buf_el_size: c_int = mem::size_of::<i16>() as c_int;
-        let output_desc = sys::AACENC_BufDesc {
-            numBufs: 1,
-            bufs: &mut output_buf as *mut _ as *mut *mut c_void,
-            bufferIdentifiers: &mut output_buf_ident as *mut _,
-            bufSizes: &mut output_buf_size as *mut _,
-            bufElSizes: &mut output_buf_el_size as *mut _,
-        };
+        let channels = 2; // hard-coded to stereo
+        let buffer_len = 2*channels*info.frameLength as usize;
+        let mut input_buffer = vec![0; buffer_len];
+        let mut output_buffer = vec![0; buffer_len];
 
-        let in_args = sys::AACENC_InArgs {
-            numInSamples: input_len,
-            numAncBytes: 0,
-        };
+        let mut total_consumed_samples = 0;
+        let mut total_written_bytes = 0;
+        loop {
+            let input_len = input.read(&mut input_buffer)?;
+            if input_len == 0 {
+                break;
+            }
 
-        let mut out_args = unsafe { mem::zeroed() };
+            let mut input_buf = input_buffer.as_ptr() as *mut i16;
+            let mut input_buf_ident: c_int = sys::AACENC_BufferIdentifier_IN_AUDIO_DATA as c_int;
+            let mut input_buf_size: c_int = input_len as c_int;
+            let mut input_buf_el_size: c_int = mem::size_of::<i16>() as c_int;
+            let input_desc = sys::AACENC_BufDesc {
+                numBufs: 1,
+                bufs: &mut input_buf as *mut _ as *mut *mut c_void,
+                bufferIdentifiers: &mut input_buf_ident as *mut c_int,
+                bufSizes: &mut input_buf_size as *mut c_int,
+                bufElSizes: &mut input_buf_el_size as *mut c_int,
+            };
 
-        check(unsafe { sys::aacEncEncode(self.handle.ptr, &input_desc, &output_desc, &in_args, &mut out_args) })?;
+            let mut output_buf = output_buffer.as_mut_ptr();
+            let mut output_buf_ident: c_int = sys::AACENC_BufferIdentifier_OUT_BITSTREAM_DATA as c_int;
+            let mut output_buf_size: c_int = output_buffer.len() as c_int;
+            let mut output_buf_el_size: c_int = mem::size_of::<i16>() as c_int;
+            let output_desc = sys::AACENC_BufDesc {
+                numBufs: 1,
+                bufs: &mut output_buf as *mut _ as *mut *mut c_void,
+                bufferIdentifiers: &mut output_buf_ident as *mut _,
+                bufSizes: &mut output_buf_size as *mut _,
+                bufElSizes: &mut output_buf_el_size as *mut _,
+            };
+
+            let in_args = sys::AACENC_InArgs {
+                numInSamples: input_len as i32 / 2,
+                numAncBytes: 0,
+            };
+
+            let mut out_args = unsafe { mem::zeroed() };
+
+            let code = unsafe {
+                sys::aacEncEncode(
+                    self.handle.ptr,
+                    &input_desc,
+                    &output_desc,
+                    &in_args,
+                    &mut out_args,
+                )
+            };
+
+            if code != sys::AACENC_ERROR_AACENC_OK {
+                if code == sys::AACENC_ERROR_AACENC_ENCODE_EOF {
+                    break;
+                }
+
+                return Err(EncoderError::FdkAac(code));
+            }
+
+            let input_consumed = out_args.numInSamples as usize;
+            let output_size = out_args.numOutBytes as usize;
+            output.write(&output_buffer[0..output_size])?;
+            total_consumed_samples += input_consumed;
+            total_written_bytes += output_size;
+        }
 
         Ok(EncodeInfo {
-            output_size: out_args.numOutBytes as usize,
-            input_consumed: out_args.numInSamples as usize,
+            output_size: total_written_bytes,
+            input_consumed: total_consumed_samples,
         })
     }
 }
