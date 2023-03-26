@@ -204,6 +204,7 @@ fn main() {
         cc.include(include);
     }
 
+    cc.flag("-U__ANDROID__");
     cc.compile("libfdk-aac.a");
 
     println!("cargo:rustc-link-lib=fdk-aac");
