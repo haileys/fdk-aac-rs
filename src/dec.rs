@@ -1,5 +1,5 @@
-use std::fmt::{self, Display, Debug};
-use std::os::raw::{c_uint, c_int};
+use std::fmt::{self, Debug, Display};
+use std::os::raw::{c_int, c_uint};
 
 use fdk_aac_sys as sys;
 
@@ -9,38 +9,66 @@ pub use sys::CStreamInfo as StreamInfo;
 pub struct DecoderError(sys::AAC_DECODER_ERROR);
 
 impl DecoderError {
-    pub const OUT_OF_MEMORY: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_OUT_OF_MEMORY);
+    pub const OUT_OF_MEMORY: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_OUT_OF_MEMORY);
     pub const UNKNOWN: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNKNOWN);
-    pub const TRANSPORT_SYNC_ERROR: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TRANSPORT_SYNC_ERROR);
-    pub const NOT_ENOUGH_BITS: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_NOT_ENOUGH_BITS);
-    pub const INVALID_HANDLE: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_INVALID_HANDLE);
-    pub const UNSUPPORTED_AOT: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_AOT);
-    pub const UNSUPPORTED_FORMAT: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_FORMAT);
-    pub const UNSUPPORTED_ER_FORMAT: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_ER_FORMAT);
-    pub const UNSUPPORTED_EPCONFIG: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_EPCONFIG);
-    pub const UNSUPPORTED_MULTILAYER: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_MULTILAYER);
-    pub const UNSUPPORTED_CHANNELCONFIG: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_CHANNELCONFIG);
-    pub const UNSUPPORTED_SAMPLINGRATE: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_SAMPLINGRATE);
-    pub const INVALID_SBR_CONFIG: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_INVALID_SBR_CONFIG);
-    pub const SET_PARAM_FAIL: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_SET_PARAM_FAIL);
-    pub const NEED_TO_RESTART: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_NEED_TO_RESTART);
-    pub const OUTPUT_BUFFER_TOO_SMALL: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_OUTPUT_BUFFER_TOO_SMALL);
-    pub const TRANSPORT_ERROR: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TRANSPORT_ERROR);
+    pub const TRANSPORT_SYNC_ERROR: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TRANSPORT_SYNC_ERROR);
+    pub const NOT_ENOUGH_BITS: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_NOT_ENOUGH_BITS);
+    pub const INVALID_HANDLE: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_INVALID_HANDLE);
+    pub const UNSUPPORTED_AOT: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_AOT);
+    pub const UNSUPPORTED_FORMAT: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_FORMAT);
+    pub const UNSUPPORTED_ER_FORMAT: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_ER_FORMAT);
+    pub const UNSUPPORTED_EPCONFIG: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_EPCONFIG);
+    pub const UNSUPPORTED_MULTILAYER: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_MULTILAYER);
+    pub const UNSUPPORTED_CHANNELCONFIG: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_CHANNELCONFIG);
+    pub const UNSUPPORTED_SAMPLINGRATE: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_SAMPLINGRATE);
+    pub const INVALID_SBR_CONFIG: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_INVALID_SBR_CONFIG);
+    pub const SET_PARAM_FAIL: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_SET_PARAM_FAIL);
+    pub const NEED_TO_RESTART: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_NEED_TO_RESTART);
+    pub const OUTPUT_BUFFER_TOO_SMALL: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_OUTPUT_BUFFER_TOO_SMALL);
+    pub const TRANSPORT_ERROR: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TRANSPORT_ERROR);
     pub const PARSE_ERROR: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_PARSE_ERROR);
-    pub const UNSUPPORTED_EXTENSION_PAYLOAD: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_EXTENSION_PAYLOAD);
-    pub const DECODE_FRAME_ERROR: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_DECODE_FRAME_ERROR);
+    pub const UNSUPPORTED_EXTENSION_PAYLOAD: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_EXTENSION_PAYLOAD);
+    pub const DECODE_FRAME_ERROR: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_DECODE_FRAME_ERROR);
     pub const CRC_ERROR: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_CRC_ERROR);
-    pub const INVALID_CODE_BOOK: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_INVALID_CODE_BOOK);
-    pub const UNSUPPORTED_PREDICTION: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_PREDICTION);
-    pub const UNSUPPORTED_CCE: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_CCE);
-    pub const UNSUPPORTED_LFE: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_LFE);
-    pub const UNSUPPORTED_GAIN_CONTROL_DATA: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_GAIN_CONTROL_DATA);
-    pub const UNSUPPORTED_SBA: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_SBA);
-    pub const TNS_READ_ERROR: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TNS_READ_ERROR);
+    pub const INVALID_CODE_BOOK: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_INVALID_CODE_BOOK);
+    pub const UNSUPPORTED_PREDICTION: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_PREDICTION);
+    pub const UNSUPPORTED_CCE: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_CCE);
+    pub const UNSUPPORTED_LFE: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_LFE);
+    pub const UNSUPPORTED_GAIN_CONTROL_DATA: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_GAIN_CONTROL_DATA);
+    pub const UNSUPPORTED_SBA: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_UNSUPPORTED_SBA);
+    pub const TNS_READ_ERROR: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TNS_READ_ERROR);
     pub const RVLC_ERROR: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_RVLC_ERROR);
-    pub const ANC_DATA_ERROR: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_ANC_DATA_ERROR);
-    pub const TOO_SMALL_ANC_BUFFER: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TOO_SMALL_ANC_BUFFER);
-    pub const TOO_MANY_ANC_ELEMENTS: DecoderError = DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TOO_MANY_ANC_ELEMENTS);
+    pub const ANC_DATA_ERROR: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_ANC_DATA_ERROR);
+    pub const TOO_SMALL_ANC_BUFFER: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TOO_SMALL_ANC_BUFFER);
+    pub const TOO_MANY_ANC_ELEMENTS: DecoderError =
+        DecoderError(sys::AAC_DECODER_ERROR_AAC_DEC_TOO_MANY_ANC_ELEMENTS);
 
     pub fn message(&self) -> &'static str {
         match self.0 {
@@ -88,7 +116,12 @@ impl DecoderError {
 
 impl Debug for DecoderError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "DecoderError {{ code: {:?}, message: {:?} }}", self.0 as c_int, self.message())
+        write!(
+            f,
+            "DecoderError {{ code: {:?}, message: {:?} }}",
+            self.0 as c_int,
+            self.message()
+        )
     }
 }
 
@@ -114,9 +147,7 @@ pub struct Decoder {
 impl Decoder {
     pub fn new(transport: Transport) -> Self {
         let handle = match transport {
-            Transport::Adts => {
-                unsafe { sys::aacDecoder_Open(sys::TRANSPORT_TYPE_TT_MP4_ADTS, 1) }
-            }
+            Transport::Adts => unsafe { sys::aacDecoder_Open(sys::TRANSPORT_TYPE_TT_MP4_ADTS, 1) },
         };
 
         Decoder { handle }
@@ -126,23 +157,31 @@ impl Decoder {
         unsafe {
             let mut asc_ptr = audio_specic_config.as_ptr() as *mut u8;
             let asc_len = audio_specic_config.len() as c_uint;
-            check(sys::aacDecoder_ConfigRaw(self.handle, &mut asc_ptr as *mut _, &asc_len as *const _))
+            check(sys::aacDecoder_ConfigRaw(
+                self.handle,
+                &mut asc_ptr as *mut _,
+                &asc_len as *const _,
+            ))
         }
     }
 
     pub fn set_min_output_channels(&mut self, channels: usize) -> Result<(), DecoderError> {
         unsafe {
-            check(sys::aacDecoder_SetParam(self.handle,
+            check(sys::aacDecoder_SetParam(
+                self.handle,
                 sys::AACDEC_PARAM_AAC_PCM_MIN_OUTPUT_CHANNELS,
-                channels as i32))
+                channels as i32,
+            ))
         }
     }
 
     pub fn set_max_output_channels(&mut self, channels: usize) -> Result<(), DecoderError> {
         unsafe {
-            check(sys::aacDecoder_SetParam(self.handle,
+            check(sys::aacDecoder_SetParam(
+                self.handle,
                 sys::AACDEC_PARAM_AAC_PCM_MAX_OUTPUT_CHANNELS,
-                channels as i32))
+                channels as i32,
+            ))
         }
     }
 
@@ -152,10 +191,12 @@ impl Decoder {
             let data_len = data.len() as c_uint;
             let mut bytes_valid: c_uint = data_len;
 
-            check(sys::aacDecoder_Fill(self.handle,
+            check(sys::aacDecoder_Fill(
+                self.handle,
                 &mut data_ptr as *mut _,
                 &data_len as *const _,
-                &mut bytes_valid as *mut _))?;
+                &mut bytes_valid as *mut _,
+            ))?;
 
             Ok(data.len() - bytes_valid as usize)
         }
@@ -163,10 +204,12 @@ impl Decoder {
 
     pub fn decode_frame(&mut self, pcm: &mut [i16]) -> Result<(), DecoderError> {
         unsafe {
-            check(sys::aacDecoder_DecodeFrame(self.handle,
+            check(sys::aacDecoder_DecodeFrame(
+                self.handle,
                 pcm.as_mut_ptr() as *mut i16,
                 pcm.len() as c_int,
-                0))
+                0,
+            ))
         }
     }
 
@@ -186,7 +229,9 @@ unsafe impl Sync for Decoder {}
 
 impl Drop for Decoder {
     fn drop(&mut self) {
-        unsafe { sys::aacDecoder_Close(self.handle); }
+        unsafe {
+            sys::aacDecoder_Close(self.handle);
+        }
     }
 }
 

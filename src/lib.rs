@@ -1,2 +1,2 @@
-pub mod enc;
 pub mod dec;
+pub mod enc;
