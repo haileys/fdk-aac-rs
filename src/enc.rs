@@ -96,10 +96,17 @@ pub enum BitRate {
     VbrVeryHigh,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum ChannelMode {
+    Mono,
+    Stereo,
+}
+
 pub struct EncoderParams {
     pub bit_rate: BitRate,
     pub sample_rate: u32,
     pub transport: Transport,
+    pub channels: ChannelMode,
 }
 
 pub struct Encoder {
@@ -174,11 +181,13 @@ impl Encoder {
                 0,
             ))?;
 
-            // hardcode stereo
             check(sys::aacEncoder_SetParam(
                 handle.ptr,
                 sys::AACENC_PARAM_AACENC_CHANNELMODE,
-                2,
+                match params.channels {
+                    ChannelMode::Mono => 1,
+                    ChannelMode::Stereo => 2,
+                },
             ))?;
 
             // call encode once with all null params according to docs
