@@ -111,6 +111,9 @@ pub struct Decoder {
     handle: sys::HANDLE_AACDECODER,
 }
 
+unsafe impl Send for Decoder {}
+unsafe impl Sync for Decoder {}
+
 impl Decoder {
     pub fn new(transport: Transport) -> Self {
         let handle = match transport {
@@ -180,9 +183,6 @@ impl Decoder {
         unsafe { &*sys::aacDecoder_GetStreamInfo(self.handle) }
     }
 }
-
-unsafe impl Send for Decoder {}
-unsafe impl Sync for Decoder {}
 
 impl Drop for Decoder {
     fn drop(&mut self) {

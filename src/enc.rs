@@ -55,6 +55,9 @@ struct EncoderHandle {
     ptr: sys::HANDLE_AACENCODER,
 }
 
+unsafe impl Send for EncoderHandle {}
+unsafe impl Sync for EncoderHandle {}
+
 impl EncoderHandle {
     pub fn alloc(max_modules: usize, max_channels: usize) -> Result<Self, EncoderError> {
         let mut ptr: sys::HANDLE_AACENCODER = ptr::null_mut();
