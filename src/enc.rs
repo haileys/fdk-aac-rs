@@ -90,11 +90,46 @@ pub enum ChannelMode {
     Stereo,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum AudioObjectType {
+    /// MPEG-4 AAC Low Complexity.
+    ///
+    /// Value: 2
+    Mpeg4LowComplexity,
+    /// MPEG-4 AAC Low Complexity with Spectral Band Replication (HE-AAC).
+    ///
+    /// Value: 5
+    Mpeg4HeAac,
+    /// MPEG-4 AAC Low Complexity with Spectral Band Replication and Parametric
+    /// Stereo (HE-AAC v2). This configuration can be used only with stereo
+    /// input audio data.
+    ///
+    /// Value: 29
+    Mpeg4HeAacV2,
+    /// MPEG-4 AAC Low-Delay.
+    ///
+    /// Value: 23
+    Mpeg4LowDelay,
+    /// MPEG-4 AAC Enhanced Low-Delay.
+    ///
+    /// Value: 39
+    Mpeg4EnhancedLowDelay,
+    /// MPEG-2 AAC Low Complexity.
+    ///
+    /// Value: 129
+    Mpeg2Aac,
+    /// MPEG-2 AAC Low Complexity with Spectral Band Replication (HE-AAC)
+    ///
+    /// Value: 132
+    Mpeg2HeAac,
+}
+
 pub struct EncoderParams {
     pub bit_rate: BitRate,
     pub sample_rate: u32,
     pub transport: Transport,
     pub channels: ChannelMode,
+    pub audio_object_type: AudioObjectType,
 }
 
 pub struct Encoder {
@@ -118,8 +153,17 @@ impl Encoder {
         let handle = EncoderHandle::alloc(0, 2 /* hardcode stereo */)?;
 
         unsafe {
-            // hardcode MPEG-4 AAC Low Complexity for now:
-            check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_AOT, 2))?;
+            let aot = match params.audio_object_type {
+                AudioObjectType::Mpeg4LowComplexity => 2,
+                AudioObjectType::Mpeg4HeAac => 5,
+                AudioObjectType::Mpeg4HeAacV2 => 29,
+                AudioObjectType::Mpeg4LowDelay => 23,
+                AudioObjectType::Mpeg4EnhancedLowDelay => 39,
+                AudioObjectType::Mpeg2Aac => 129,
+                AudioObjectType::Mpeg2HeAac => 132,
+            };
+
+            check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_AOT, aot))?;
 
             let bitrate_mode = match params.bit_rate {
                 BitRate::Cbr(bitrate) => {
