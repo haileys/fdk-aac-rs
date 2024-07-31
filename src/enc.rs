@@ -154,16 +154,16 @@ impl Encoder {
 
         unsafe {
             let aot = match params.audio_object_type {
-                AudioObjectType::Mpeg4LowComplexity => 2,
-                AudioObjectType::Mpeg4HeAac => 5,
-                AudioObjectType::Mpeg4HeAacV2 => 29,
-                AudioObjectType::Mpeg4LowDelay => 23,
-                AudioObjectType::Mpeg4EnhancedLowDelay => 39,
-                AudioObjectType::Mpeg2Aac => 129,
-                AudioObjectType::Mpeg2HeAac => 132,
+                AudioObjectType::Mpeg4LowComplexity => sys::AUDIO_OBJECT_TYPE_AOT_AAC_LC,
+                AudioObjectType::Mpeg4HeAac => sys::AUDIO_OBJECT_TYPE_AOT_SBR,
+                AudioObjectType::Mpeg4HeAacV2 => sys::AUDIO_OBJECT_TYPE_AOT_PS,
+                AudioObjectType::Mpeg4LowDelay => sys::AUDIO_OBJECT_TYPE_AOT_ER_AAC_LD,
+                AudioObjectType::Mpeg4EnhancedLowDelay => sys::AUDIO_OBJECT_TYPE_AOT_ER_AAC_ELD,
+                AudioObjectType::Mpeg2Aac => sys::AUDIO_OBJECT_TYPE_AOT_MP2_AAC_LC,
+                AudioObjectType::Mpeg2HeAac => sys::AUDIO_OBJECT_TYPE_AOT_MP2_SBR,
             };
 
-            check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_AOT, aot))?;
+            check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_AOT, aot as u32))?;
 
             let bitrate_mode = match params.bit_rate {
                 BitRate::Cbr(bitrate) => {
