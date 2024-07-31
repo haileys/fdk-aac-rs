@@ -90,11 +90,46 @@ pub enum ChannelMode {
     Stereo,
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum AudioObjectType {
+    /// MPEG-4 AAC Low Complexity.
+    ///
+    /// Value: 2
+    Mpeg4LowComplexity,
+    /// MPEG-4 AAC Low Complexity with Spectral Band Replication (HE-AAC).
+    ///
+    /// Value: 5
+    Mpeg4HeAac,
+    /// MPEG-4 AAC Low Complexity with Spectral Band Replication and Parametric
+    /// Stereo (HE-AAC v2). This configuration can be used only with stereo
+    /// input audio data.
+    ///
+    /// Value: 29
+    Mpeg4HeAacV2,
+    /// MPEG-4 AAC Low-Delay.
+    ///
+    /// Value: 23
+    Mpeg4LowDelay,
+    /// MPEG-4 AAC Enhanced Low-Delay.
+    ///
+    /// Value: 39
+    Mpeg4EnhancedLowDelay,
+    /// MPEG-2 AAC Low Complexity.
+    ///
+    /// Value: 129
+    Mpeg2Aac,
+    /// MPEG-2 AAC Low Complexity with Spectral Band Replication (HE-AAC)
+    ///
+    /// Value: 132
+    Mpeg2HeAac,
+}
+
 pub struct EncoderParams {
     pub bit_rate: BitRate,
     pub sample_rate: u32,
     pub transport: Transport,
     pub channels: ChannelMode,
+    pub audio_object_type: AudioObjectType,
 }
 
 pub struct Encoder {
@@ -118,8 +153,17 @@ impl Encoder {
         let handle = EncoderHandle::alloc(0, 2 /* hardcode stereo */)?;
 
         unsafe {
-            // hardcode MPEG-4 AAC Low Complexity for now:
-            check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_AOT, 2))?;
+            let aot = match params.audio_object_type {
+                AudioObjectType::Mpeg4LowComplexity => sys::AUDIO_OBJECT_TYPE_AOT_AAC_LC,
+                AudioObjectType::Mpeg4HeAac => sys::AUDIO_OBJECT_TYPE_AOT_SBR,
+                AudioObjectType::Mpeg4HeAacV2 => sys::AUDIO_OBJECT_TYPE_AOT_PS,
+                AudioObjectType::Mpeg4LowDelay => sys::AUDIO_OBJECT_TYPE_AOT_ER_AAC_LD,
+                AudioObjectType::Mpeg4EnhancedLowDelay => sys::AUDIO_OBJECT_TYPE_AOT_ER_AAC_ELD,
+                AudioObjectType::Mpeg2Aac => sys::AUDIO_OBJECT_TYPE_AOT_MP2_AAC_LC,
+                AudioObjectType::Mpeg2HeAac => sys::AUDIO_OBJECT_TYPE_AOT_MP2_SBR,
+            };
+
+            check(sys::aacEncoder_SetParam(handle.ptr, sys::AACENC_PARAM_AACENC_AOT, aot as u32))?;
 
             let bitrate_mode = match params.bit_rate {
                 BitRate::Cbr(bitrate) => {
