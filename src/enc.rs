@@ -229,7 +229,7 @@ impl Encoder {
         let mut output_buf = output.as_mut_ptr();
         let mut output_buf_ident: c_int = sys::AACENC_BufferIdentifier_OUT_BITSTREAM_DATA as c_int;
         let mut output_buf_size: c_int = output.len() as c_int;
-        let mut output_buf_el_size: c_int = mem::size_of::<i16>() as c_int;
+        let mut output_buf_el_size: c_int = mem::size_of::<u8>() as c_int;
         let output_desc = sys::AACENC_BufDesc {
             numBufs: 1,
             bufs: &mut output_buf as *mut _ as *mut *mut c_void,
