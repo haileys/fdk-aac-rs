@@ -1,7 +1,7 @@
 [package]
 name = "fdk-aac-sys"
 version = "0.5.0"
-authors = ["Hailey Somerville <hailey@hailey.lol>"]
+authors = ["Hailey Somerville <hailey@hails.org>"]
 edition = "2018"
 license = "MIT"
 description = "FFI bindings for libfdk-aac"
