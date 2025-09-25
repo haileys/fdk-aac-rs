@@ -117,6 +117,9 @@ unsafe impl Sync for Decoder {}
 impl Decoder {
     pub fn new(transport: Transport) -> Self {
         let handle = match transport {
+            Transport::Raw => {
+                unsafe { sys::aacDecoder_Open(sys::TRANSPORT_TYPE_TT_MP4_RAW, 1) }
+            }
             Transport::Adts => {
                 unsafe { sys::aacDecoder_Open(sys::TRANSPORT_TYPE_TT_MP4_ADTS, 1) }
             }
@@ -192,5 +195,6 @@ impl Drop for Decoder {
 
 #[derive(Clone, Copy, Debug)]
 pub enum Transport {
+    Raw,
     Adts,
 }
